@@ -17,14 +17,28 @@ const OffCanvas = ({ children, show, onClose, title }) => {
         };
     }, [show, onClose]);
 
+    useEffect(() => {
+        const handleBackdropClick = (event) => {
+            if (show && event.target.classList.contains('offcanvas-backdrop')) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+        };
+
+        document.addEventListener('click', handleBackdropClick, true);
+        return () => {
+            document.removeEventListener('click', handleBackdropClick, true);
+        };
+    }, [show]);
+
     return show
         ? ReactDOM.createPortal(
             <>
                 <div className="offcanvas-backdrop show" />
-                <div className="offcanvas offcanvas-end show" tabIndex={-1} id="offcanvasRight" aria-labelledby="offcanvasRightLabel" ref={offcanvasRef}>
+                <div className="offcanvas offcanvas-end show" tabIndex={-1} ref={offcanvasRef}>
                     <div className="offcanvas-header">
-                        <h5 id="offcanvasRightLabel">{title}</h5>
-                        <button type="button" className="btn-close" aria-label="Close" onClick={onClose} />
+                        <h5>{title}</h5>
+                        <button type="button" className="btn-close" onClick={onClose} aria-label="Close"></button>
                     </div>
                     <div className="offcanvas-body">
                         {children}

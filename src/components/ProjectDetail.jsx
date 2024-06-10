@@ -8,14 +8,16 @@ import TaskGridView from './TaskGridView';
 
 export default function ProjectDetail () {
   const [tasks, setTasks] = useState([]);
+  const [sections, setSections] = useState([]);
+  const [users, setUsers] = useState([]);
   const { projectId } = useParams();
   const { authTokens } = useContext(AuthContext);
 
   useEffect(() => {
-      // Function to fetch tasks from API
-      const fetchTasks = async () => {
+      // Function to fetch project data from API
+      const fetchProjectData = async () => {
           try {
-              const response = await axios.get(`http://localhost:8000/projects/${projectId}/sections`, {
+              const response = await axios.get(`http://localhost:8000/projects/${projectId}/detail`, {
                 headers: {
                     Authorization: `Bearer ${authTokens?.access}`
                 }
@@ -23,28 +25,55 @@ export default function ProjectDetail () {
             console.log('API Response Data:', response.data);
 
             if (response.data) {
-                setTasks(response.data);
+                setSections(response.data.sections);
+                setUsers(response.data.members);
+
+                // Extract tasks from sections
+                const allTasks = response.data.sections.flatMap(section => section.tasks);
+                setTasks(allTasks);
             } else {
                 console.error('Unexpected response structure:', response);
             }
         } catch (error) {
-            console.error('Error fetching tasks:', error);
+            console.error('Error fetching project data:', error);
         }
     };
 
-    fetchTasks();
-}, []);
+    fetchProjectData();
+}, [projectId, authTokens]);
 
-  const handleUpdateTask = (updatedTask) => {
-      setTasks((prevTasks) => 
-          prevTasks.map((section) => ({
-              ...section,
-              tasks: section.tasks.map((task) => 
-                  task.id === updatedTask.id ? updatedTask : task
-              )
-          }))
-      );
-  };
+    const handleUpdateTask = (updatedTask) => {
+        // Update the tasks state
+        setTasks((prevTasks) => 
+            prevTasks.map((task) => 
+                task.id === updatedTask.id ? updatedTask : task
+            )
+        );
+
+        // Update the sections state
+        setSections((prevSections) => {
+            let newSections = prevSections.map((section) => {
+                // Remove the task from its current section
+                return {
+                    ...section,
+                    tasks: section.tasks.filter((task) => task.id !== updatedTask.id)
+                };
+            });
+
+            // Find the section to which the updated task belongs
+            const targetSectionIndex = newSections.findIndex(
+                (section) => section.id === updatedTask.section
+            );
+
+            // Add the updated task to the correct section
+            if (targetSectionIndex !== -1) {
+                newSections[targetSectionIndex].tasks.push(updatedTask);
+            }
+
+            return newSections;
+        });
+    };
+
 
   return (
       <div>
@@ -149,12 +178,12 @@ export default function ProjectDetail () {
           <div className="tab-content" id="connectionsTabContent">
               <div className="tab-pane fade show active" id="grid" role="tabpanel" aria-labelledby="grid-tab">
                   {/* Content */}
-                  <TaskGridView tasks={tasks} onUpdateTask={handleUpdateTask} />
+                  <TaskGridView projectId={projectId} sections={sections} users={users} tasks={tasks} onUpdateTask={handleUpdateTask} />
                   {/* End Content */}
               </div>
               <div className="tab-pane fade" id="list" role="tabpanel" aria-labelledby="list-tab">
                   {/* Content */}
-                    <TaskListView projectId={projectId} onUpdateTask={handleUpdateTask} />
+                    <TaskListView projectId={projectId} sections={sections} users={users} tasks={tasks} onUpdateTask={handleUpdateTask} />
                   {/* End Content */}
               </div>
           </div>

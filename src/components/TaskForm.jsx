@@ -4,21 +4,32 @@ import { AuthContext } from '../contexts/AuthContext';
 import { debounce } from 'lodash';
 import Timeline from './CommentTimeline';
 
-const TaskForm = ({ projectId, initialDetails, onClose, onUpdateTask }) => {
+const TaskForm = ({ projectId, initialDetails = {}, onClose, onUpdateTask, users, sections }) => {
+    console.log(`sec11: ${sections}`)
     const [details, setDetails] = useState(initialDetails);
     const [errors, setErrors] = useState({});
     const { authTokens } = useContext(AuthContext);
 
+    const isNewTask = !initialDetails.id;
+
     const debouncedSaveChanges = useCallback(
         debounce((fieldName, updatedDetails) => {
-            axios.put(`http://127.0.0.1:8000/projects/${projectId}/tasks/${initialDetails.id}/`, updatedDetails, {
+            const url = isNewTask
+                ? `http://127.0.0.1:8000/projects/${projectId}/tasks/`
+                : `http://127.0.0.1:8000/projects/${projectId}/tasks/${initialDetails.id}/`;
+            const method = isNewTask ? 'post' : 'put';
+
+            axios({
+                method,
+                url,
+                data: updatedDetails,
                 headers: {
                     'Authorization': `Bearer ${authTokens.access}`,
                     'Content-Type': 'application/json'
                 }
             })
             .then(response => {
-                console.log('Task updated successfully:', response.data);
+                console.log('Task saved successfully:', response.data);
                 setErrors((prevErrors) => ({
                     ...prevErrors,
                     [fieldName]: null
@@ -26,13 +37,13 @@ const TaskForm = ({ projectId, initialDetails, onClose, onUpdateTask }) => {
                 onUpdateTask(response.data); // Notify parent of the update
             })
             .catch(error => {
-                console.error('Error updating task:', error.response.data);
+                console.error('Error saving task:', error.response.data);
                 setErrors((prevErrors) => ({
                     ...prevErrors,
-                    [fieldName]: 'Failed to update field. Please try again.'
+                    [fieldName]: 'Failed to save field. Please try again.'
                 }));
             });
-        }, 500), [projectId, authTokens.access] // Add dependencies
+        }, 500), [projectId, authTokens.access, isNewTask] // Add dependencies
     );
 
     const handleInputChange = (e) => {
@@ -56,7 +67,8 @@ const TaskForm = ({ projectId, initialDetails, onClose, onUpdateTask }) => {
                     className="form-control form-control-title"
                     id="taskTitle"
                     name="title"
-                    value={details.title}
+                    placeholder="Task Title"
+                    value={details.title || ''}
                     onChange={handleInputChange}
                 />
                 {errors.title && <div className="alert alert-danger">{errors.title}</div>}
@@ -68,13 +80,30 @@ const TaskForm = ({ projectId, initialDetails, onClose, onUpdateTask }) => {
                         className="form-control form-control-borderless"
                         id="taskStatus"
                         name="status"
-                        value={details.status}
+                        value={details.status || 'Incomplete'}
                         onChange={handleInputChange}
                     >
                         <option value="Incomplete">Incomplete</option>
                         <option value="Complete">Complete</option>
                     </select>
                     {errors.status && <div className="alert alert-danger">{errors.status}</div>}
+                </div>
+            </div>
+            <div className="row mb-3">
+                <label htmlFor="taskSection" className="col-sm-3 col-form-label">Section</label>
+                <div className="col-sm-9">
+                    <select
+                        className="form-control form-control-borderless"
+                        id="taskSection"
+                        name="section"
+                        value={details.section || 'TODO'}
+                        onChange={handleInputChange}
+                    >
+                        {sections.map((section) => (
+                            <option value={section.id}>{section.name}</option>
+                        ))}
+                    </select>
+                    {errors.section && <div className="alert alert-danger">{errors.section}</div>}
                 </div>
             </div>
             <div className="row mb-3">
@@ -85,7 +114,8 @@ const TaskForm = ({ projectId, initialDetails, onClose, onUpdateTask }) => {
                         className="form-control form-control-borderless"
                         id="taskDueDate"
                         name="due_date"
-                        value={details.due_date}
+                        placeholder="YYYY-MM-DD"
+                        value={details.due_date || ''}
                         onChange={handleInputChange}
                     />
                     {errors.due_date && <div className="alert alert-danger">{errors.due_date}</div>}
@@ -94,14 +124,17 @@ const TaskForm = ({ projectId, initialDetails, onClose, onUpdateTask }) => {
             <div className="row mb-3">
                 <label htmlFor="taskAssignedTo" className="col-sm-3 col-form-label">Assigned To</label>
                 <div className="col-sm-9">
-                    <input
-                        type="number"
+                    <select
                         className="form-control form-control-borderless"
                         id="taskAssignedTo"
                         name="assigned_to"
-                        value={details.assigned_to}
+                        value={details.assigned_to || ''}
                         onChange={handleInputChange}
-                    />
+                    >
+                        {users.map((user) => (
+                            <option value={user.id}>{user.username}</option>
+                        ))}
+                    </select>
                     {errors.assigned_to && <div className="alert alert-danger">{errors.assigned_to}</div>}
                 </div>
             </div>
@@ -111,7 +144,8 @@ const TaskForm = ({ projectId, initialDetails, onClose, onUpdateTask }) => {
                     className="form-control input-group-borderless"
                     id="taskDescription"
                     name="description"
-                    value={details.description}
+                    placeholder="Task Description"
+                    value={details.description || ''}
                     onChange={handleInputChange}
                 />
                 {errors.description && <div className="alert alert-danger">{errors.description}</div>}

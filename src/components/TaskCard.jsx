@@ -3,7 +3,7 @@ import OffCanvas from './OffCanvas';
 import TaskForm from './TaskForm';
 import useTaskDetailsOffcanvas from '../hooks/useTaskDetailsOffCanvas';
 
-export default function TaskCard({ projectId, task, onUpdateTask }) {
+export default function TaskCard({ projectId, task, onUpdateTask, users, sections }) {
     const {
         showOffcanvas,
         taskDetails,
@@ -102,7 +102,7 @@ export default function TaskCard({ projectId, task, onUpdateTask }) {
 
             {showOffcanvas && (
                 <OffCanvas show={showOffcanvas} onClose={handleCloseOffcanvas} title="Edit Task">
-                    <TaskForm projectId={projectId} initialDetails={taskDetails} onClose={handleCloseOffcanvas} onUpdateTask={handleTaskUpdate} />
+                    <TaskForm projectId={projectId} initialDetails={taskDetails} onClose={handleCloseOffcanvas} onUpdateTask={handleTaskUpdate} users={users} sections={sections} />
                 </OffCanvas>
             )}
         </>
