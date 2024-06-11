@@ -1,29 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 
 const useTaskDetailsOffcanvas = (initialTask, onUpdateTask) => {
-  const [showOffcanvas, setShowOffcanvas] = useState(false);
-  const [taskDetails, setTaskDetails] = useState(initialTask);
+    const [showOffcanvas, setShowOffcanvas] = useState(false);
+    const [taskDetails, setTaskDetails] = useState(initialTask);
 
-  useEffect(() => {
-    setTaskDetails(initialTask);
-  }, [initialTask]);
+    const handleTaskClick = useCallback((task) => {
+        setTaskDetails(task);
+        setShowOffcanvas(true);
+    }, []);
 
-  const handleShowOffcanvas = () => setShowOffcanvas(true);
-  const handleCloseOffcanvas = () => setShowOffcanvas(false);
-  const handleTaskClick = () => handleShowOffcanvas();
-  const handleTaskUpdate = (updatedTask) => {
-    setTaskDetails(updatedTask);
-    onUpdateTask(updatedTask);
-  };
+    const handleTaskUpdate = useCallback((updatedTask) => {
+        onUpdateTask(updatedTask);
+        setTaskDetails(updatedTask); // Update task details in the offcanvas
+    }, [onUpdateTask]);
 
-  return {
-    showOffcanvas,
-    taskDetails,
-    handleShowOffcanvas,
-    handleCloseOffcanvas,
-    handleTaskClick,
-    handleTaskUpdate,
-  };
+    const handleCloseOffcanvas = useCallback(() => {
+        setShowOffcanvas(false);
+    }, []);
+
+    return {
+        showOffcanvas,
+        taskDetails,
+        handleTaskClick,
+        handleTaskUpdate,
+        handleCloseOffcanvas,
+    };
 };
 
 export default useTaskDetailsOffcanvas;

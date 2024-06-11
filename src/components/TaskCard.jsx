@@ -1,17 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import OffCanvas from './OffCanvas';
 import TaskForm from './TaskForm';
-import useTaskDetailsOffcanvas from '../hooks/useTaskDetailsOffCanvas';
 
-export default function TaskCard({ projectId, task, onUpdateTask, users, sections }) {
-    const {
-        showOffcanvas,
-        taskDetails,
-        handleShowOffcanvas,
-        handleCloseOffcanvas,
-        handleTaskClick,
-        handleTaskUpdate,
-      } = useTaskDetailsOffcanvas(task, onUpdateTask);
+export default function TaskCard({ projectId, task, onUpdateTask, users, sections, onTaskClick }) {
+    const handleClick = () => {
+        onTaskClick(task);
+    };
 
     return (
         <>
@@ -19,13 +13,13 @@ export default function TaskCard({ projectId, task, onUpdateTask, users, section
             <div
                 className="js-sortable-link sortablejs-custom sortablejs-custom-rotate sortablejs-custom-handle"
                 data-href="#"
-                onClick={handleTaskClick}
+                onClick={handleClick}
             >
                 <div className="card mb-3">
                     <div className="card-body">
                         <div className="d-flex mb-5">
                             <div className="me-2">
-                                <h4 className="text-wrap">{taskDetails.title}</h4>
+                                <h4 className="text-wrap">{task.title}</h4>
                             </div>
                             <div className="ms-auto">
                                 {/* Dropdown */}
@@ -52,8 +46,7 @@ export default function TaskCard({ projectId, task, onUpdateTask, users, section
                                         </a>
                                         <div className="dropdown-divider" />
                                         <a className="dropdown-item text-danger" href="#">
-                                            <i className="bi-trash dropdown-item-icon text-danger" />
-                                            Remove
+                                            <i className="bi-trash dropdown-item-icon text-danger" /> Remove
                                         </a>
                                     </div>
                                 </div>
@@ -99,12 +92,6 @@ export default function TaskCard({ projectId, task, onUpdateTask, users, section
                 </div>
             </div>
             {/* End Card */}
-
-            {showOffcanvas && (
-                <OffCanvas show={showOffcanvas} onClose={handleCloseOffcanvas} title="Edit Task">
-                    <TaskForm projectId={projectId} initialDetails={taskDetails} onClose={handleCloseOffcanvas} onUpdateTask={handleTaskUpdate} users={users} sections={sections} />
-                </OffCanvas>
-            )}
         </>
     );
 }

@@ -1,12 +1,10 @@
 import React from 'react';
-import TaskCard from './TaskCard'; // Import your TaskCard component
+import TaskCard from './TaskCard';
 import useTaskDetailsOffcanvas from '../hooks/useTaskDetailsOffCanvas';
-import OffCanvas from './OffCanvas'; // Import OffCanvas component
-import TaskForm from './TaskForm'; // Import TaskForm component
+import OffCanvas from './OffCanvas';
+import TaskForm from './TaskForm';
 
 const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask }) => {
-    console.log(`sec: ${sections}`)
-
     const {
         showOffcanvas,
         handleCloseOffcanvas,
@@ -17,27 +15,11 @@ const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask }) => {
 
     const handleAddTaskClick = (e) => {
         e.preventDefault();
-        handleTaskClick(); // Show offcanvas
-
-        // Your logic for adding a task
-        console.log('Add task clicked');
-    };
-
-    const handleCancelClick = (e) => {
-        e.preventDefault();
-        // Your logic for canceling a task creation
-        console.log('Cancel task creation');
-    };
-
-    const handleCreateTaskClick = (e) => {
-        e.preventDefault();
-        // Your logic for creating a task
-        console.log('Create task clicked');
+        handleTaskClick({}); // Show offcanvas with an empty task for creation
     };
 
     const handleCreateGroupClick = (e) => {
         e.preventDefault();
-        // Your logic for creating a group
         console.log('Create group clicked');
     };
 
@@ -46,16 +28,7 @@ const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask }) => {
             {/* Kanban Row */}
             <ul className="row list-unstyled kanban-board-row">
                 {sections.map((section) => (
-                    <li
-                        key={section.id}
-                        className="js-add-field col-12"
-                        data-hs-add-field-options={`{
-                            "template": "#createProjectGridTemplateToDo",
-                            "container": "#createProjectGridContainerToDo",
-                            "defaultCreated": 0
-                        }`}
-                    >
-                        {/* Title */}
+                    <li key={section.id} className="js-add-field col-12">
                         <div className="js-sortable-disabled d-flex justify-content-between align-items-center mb-3">
                             <h6 className="text-cap mb-0">{section.name}</h6>
                             <a
@@ -80,6 +53,7 @@ const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask }) => {
                                     onUpdateTask={onUpdateTask}
                                     users={users}
                                     sections={sections}
+                                    onTaskClick={handleTaskClick}
                                 />
                             ))}
                             {/* End Card */}
@@ -92,7 +66,7 @@ const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask }) => {
                             <a
                                 className="btn btn-white btn-dashed-outline"
                                 type="button"
-                                onClick={handleAddTaskClick} // Removed data-bs-toggle and data-bs-target
+                                onClick={handleAddTaskClick}
                             >
                                 <i className="bi-plus"></i> Add task
                             </a>
@@ -126,9 +100,10 @@ const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask }) => {
                 <OffCanvas show={showOffcanvas} onClose={handleCloseOffcanvas} title="Create a Task">
                     <TaskForm
                         projectId={projectId}
+                        initialDetails={taskDetails}
                         onClose={handleCloseOffcanvas}
                         onUpdateTask={handleTaskUpdate}
-                        users={users} // Pass users to TaskForm
+                        users={users}
                         sections={sections}
                     />
                 </OffCanvas>

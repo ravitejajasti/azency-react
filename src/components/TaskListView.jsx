@@ -2,51 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import TaskForm from './TaskForm';
 import { AuthContext } from '../contexts/AuthContext';
 import axios from 'axios';
+import useTaskDetailsOffcanvas from '../hooks/useTaskDetailsOffCanvas';
 
-const TaskListView = ({ projectId, onUpdateTask }) => {
-  const [selectedTask, setSelectedTask] = useState(null);
-  const [sections, setSections] = useState([]);
-  const { authTokens } = useContext(AuthContext);
-  const handleShowOffcanvas = () => setShowOffcanvas(true);
-  const handleCloseOffcanvas = () => setShowOffcanvas(false);
-  useEffect(() => {
-    // Function to fetch tasks from API
-    const fetchTasks = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8000/projects/${projectId}/sections`, {
-          headers: {
-            Authorization: `Bearer ${authTokens?.access}`
-          }
-        }); // Adjust the API endpoint as necessary
-        console.log('API Response Data:', response.data);
-
-        if (response.data) {
-          setSections(response.data);
-        } else {
-          console.error('Unexpected response structure:', response);
-        }
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-      }
-    };
-
-    fetchTasks();
-  }, [projectId, authTokens]);
-
-  const handleUpdateTask = (updatedTask) => {
-    setSections((prevSections) =>
-      prevSections.map((section) => ({
-        ...section,
-        tasks: section.tasks.map((task) =>
-          task.id === updatedTask.id ? updatedTask : task
-        )
-      }))
-    );
-  };
-
-  const handleTaskClick = (task) => {
-    setSelectedTask(task);
-  };
+const TaskListView = ({ projectId, onUpdateTask, tasks, users, sections }) => {
+  const {
+    showOffcanvas,
+    handleCloseOffcanvas,
+    handleTaskClick,
+    handleTaskUpdate,
+    taskDetails,
+  } = useTaskDetailsOffcanvas(null, onUpdateTask);
 
   return (
     <div className="splitted-content-main">
@@ -67,7 +32,7 @@ const TaskListView = ({ projectId, onUpdateTask }) => {
         </style>
         {/* Offcanvas Content */}
         <div
-          className="js-offcanvas-start offcanvas offcanvas-start splitted-content-small splitted-content-bordered d-flex flex-column"
+          className={`js-offcanvas-start offcanvas offcanvas-start splitted-content-small splitted-content-bordered d-flex flex-column ${showOffcanvas ? 'show' : ''}`}
           tabIndex={-1}
           id="splittedOffcanvasContent"
         >
@@ -82,7 +47,7 @@ const TaskListView = ({ projectId, onUpdateTask }) => {
                       <h6 className="text-cap mb-0">{section.name}</h6>
                       <a
                         className="js-create-field btn btn-icon btn-sm btn-white"
-                        href="javascript:;"
+                        href="#"
                         data-bs-toggle="tooltip"
                         data-bs-placement="left"
                         title="Add project"
@@ -236,13 +201,15 @@ const TaskListView = ({ projectId, onUpdateTask }) => {
           
           <div className="mt-xl-10">
             {/* Title */}
-            {selectedTask ? (
+            {taskDetails ? (
               <TaskForm
-                key={selectedTask.id}
-                projectId="9"
-                initialDetails={selectedTask}
+                key={taskDetails.id}
+                projectId={projectId}
+                initialDetails={taskDetails}
                 onClose={handleCloseOffcanvas}
-                onUpdateTask={handleUpdateTask}
+                onUpdateTask={handleTaskUpdate}
+                users={users}
+                sections={sections}
               />
             ) : (
               <div className="text-center">
