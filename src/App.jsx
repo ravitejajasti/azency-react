@@ -8,7 +8,7 @@ import Register from './components/Register';
 import Logout from './components/Logout';
 import ProjectDetail from './components/ProjectDetail';
 import useIdleTimer from './hooks/useIdleTimer'; // Import the custom hook
-
+import Chat from './components/Chat'
 const PrivateRoute = ({ children }) => {
   const { authTokens } = useContext(AuthContext);
   return authTokens ? children : <Navigate to="/login" />;
@@ -30,6 +30,7 @@ function App() {
         <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
         <Route path="/projects/:projectId" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />
         <Route path="/" element={<Navigate to="/login" />} />
+        <Route path="/chat" element={<Chat />} />
       </Routes>
     </Router>
   );
