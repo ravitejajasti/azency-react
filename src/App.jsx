@@ -18,7 +18,7 @@ function App() {
   const { logoutUser } = useContext(AuthContext);
 
   // Use the custom hook to auto logout after 5 minutes (300000 milliseconds) of inactivity
-  useIdleTimer(logoutUser, 300000);
+  useIdleTimer(logoutUser, 3000000);
 
   return (
     <Router>

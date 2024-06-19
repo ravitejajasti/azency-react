@@ -13,6 +13,7 @@ export default function TaskCard({ projectId, task, onUpdateTask, users, section
             <div
                 className="js-sortable-link sortablejs-custom sortablejs-custom-rotate sortablejs-custom-handle"
                 data-href="#"
+                data-task-id={task.id}
                 onClick={handleClick}
             >
                 <div className="card mb-3">

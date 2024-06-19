@@ -5,7 +5,6 @@ import { debounce } from 'lodash';
 import Timeline from './CommentTimeline';
 
 const TaskForm = ({ projectId, initialDetails = {}, onClose, onUpdateTask, users, sections }) => {
-    console.log(`sec11: ${sections}`)
     const [details, setDetails] = useState(initialDetails);
     const [errors, setErrors] = useState({});
     const { authTokens } = useContext(AuthContext);

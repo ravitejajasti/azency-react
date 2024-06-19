@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useEffect, useContext, useRef } from 'react';
+import Sortable from 'sortablejs';
 import TaskCard from './TaskCard';
 import useTaskDetailsOffcanvas from '../hooks/useTaskDetailsOffCanvas';
 import OffCanvas from './OffCanvas';
 import TaskForm from './TaskForm';
+import { AuthContext } from '../contexts/AuthContext';
+import axios from 'axios';
 
 const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask }) => {
     const {
@@ -23,11 +26,57 @@ const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask }) => {
         console.log('Create group clicked');
     };
 
+    const sectionRefs = useRef([]);
+    const { authTokens } = useContext(AuthContext);
+
+    useEffect(() => {
+        sectionRefs.current.forEach((sectionRef, index) => {
+            if (sectionRef) {
+                Sortable.create(sectionRef, {
+                    // forceFallback: true,
+                    animation: 150,
+                    group: 'listGroup',
+                    delay: 500,
+                    delayOnTouchOnly: true,
+                    onEnd: async (event) => {
+                        const { from, to, item } = event;
+                        const fromSectionId = from.getAttribute('data-section-id');
+                        const toSectionId = to.getAttribute('data-section-id');
+                        const taskId = item.getAttribute('data-task-id');
+                        console.log(fromSectionId, toSectionId, taskId, authTokens)
+                        if (fromSectionId !== toSectionId && taskId) {
+                            console.log(`Task ${taskId} moved from section ${fromSectionId} to section ${toSectionId}`);
+                            // Update task section in state or call an API to update the task's section
+                            // onUpdateTask(taskId, { sectionId: toSectionId });
+                            try {
+                                const resp = await axios.get(`http://localhost:8000/projects/${projectId}/tasks/${taskId}/`, {
+                                    headers: {
+                                        Authorization: `Bearer ${authTokens?.access}`
+                                      }
+                            });
+                                const updatedTask = resp.data;
+                                console.log(updatedTask)
+                                updatedTask.section = toSectionId
+                                await axios.put(`http://localhost:8000/projects/${projectId}/tasks/${taskId}/`, updatedTask, {
+                                    headers: {
+                                        Authorization: `Bearer ${authTokens?.access}`
+                                      }
+                                })
+                            } catch (error) {
+                                console.error(error)
+                            }
+                        }
+                    },
+                });
+            }
+        });
+    }, [sections]);
+
     return (
         <div className="content container-fluid kanban-board">
             {/* Kanban Row */}
             <ul className="row list-unstyled kanban-board-row">
-                {sections.map((section) => (
+                {sections.map((section, index) => (
                     <li key={section.id} className="js-add-field col-12">
                         <div className="js-sortable-disabled d-flex justify-content-between align-items-center mb-3">
                             <h6 className="text-cap mb-0">{section.name}</h6>
@@ -43,9 +92,13 @@ const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask }) => {
                             </a>
                         </div>
                         {/* End Title */}
-                        <div className="js-sortable">
+                        <div
+                            className="js-sortable"
+                            ref={(el) => (sectionRefs.current[index] = el)}
+                            data-section-id={section.id}
+                        >
                             {/* Card */}
-                            {section.tasks.map((task) => (
+                            {section.tasks && section.tasks.map((task) => (
                                 <TaskCard
                                     key={task.id}
                                     projectId={projectId}
