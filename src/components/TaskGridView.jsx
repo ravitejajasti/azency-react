@@ -7,7 +7,7 @@ import TaskForm from './TaskForm';
 import { AuthContext } from '../contexts/AuthContext';
 import axios from 'axios';
 
-const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask }) => {
+const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask, onDeleteTask }) => {
     const {
         showOffcanvas,
         handleCloseOffcanvas,
@@ -107,6 +107,7 @@ const TaskGridView = ({ projectId, sections, users, tasks, onUpdateTask }) => {
                                     users={users}
                                     sections={sections}
                                     onTaskClick={handleTaskClick}
+                                    onDeleteTask={onDeleteTask}
                                 />
                             ))}
                             {/* End Card */}

@@ -2,9 +2,15 @@ import React from 'react';
 import OffCanvas from './OffCanvas';
 import TaskForm from './TaskForm';
 
-export default function TaskCard({ projectId, task, onUpdateTask, users, sections, onTaskClick }) {
+export default function TaskCard({ projectId, task, onUpdateTask, users, sections, onTaskClick, onDeleteTask }) {
     const handleClick = () => {
         onTaskClick(task);
+    };
+
+    const handleDelete = (event) => {
+        event.preventDefault(); // Prevent the default action of the link
+        event.stopPropagation(); // Prevent the event from bubbling up to parent elements
+        onDeleteTask(task.id);
     };
 
     return (
@@ -46,7 +52,7 @@ export default function TaskCard({ projectId, task, onUpdateTask, users, section
                                             <i className="bi-archive dropdown-item-icon" /> Archive project
                                         </a>
                                         <div className="dropdown-divider" />
-                                        <a className="dropdown-item text-danger" href="#">
+                                        <a className="dropdown-item text-danger" href="#" onClick={handleDelete}>
                                             <i className="bi-trash dropdown-item-icon text-danger" /> Remove
                                         </a>
                                     </div>

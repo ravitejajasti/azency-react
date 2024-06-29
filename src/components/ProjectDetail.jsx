@@ -5,6 +5,7 @@ import TaskCard from './TaskCard';
 import { useParams } from 'react-router-dom';
 import TaskListView from './TaskListView';
 import TaskGridView from './TaskGridView';
+import TeamMembers from './TeamMembers';
 
 export default function ProjectDetail () {
   const [tasks, setTasks] = useState([]);
@@ -42,38 +43,59 @@ export default function ProjectDetail () {
     fetchProjectData();
 }, [projectId, authTokens]);
 
-    const handleUpdateTask = (updatedTask) => {
-        // Update the tasks state
-        setTasks((prevTasks) => 
-            prevTasks.map((task) => 
-                task.id === updatedTask.id ? updatedTask : task
-            )
+const handleUpdateTask = (updatedTask) => {
+    // Update the tasks state
+    setTasks((prevTasks) => 
+        prevTasks.map((task) => 
+            task.id === updatedTask.id ? updatedTask : task
+        )
+    );
+
+    // Update the sections state
+    setSections((prevSections) => {
+        let newSections = prevSections.map((section) => {
+            // Remove the task from its current section
+            return {
+                ...section,
+                tasks: section.tasks.filter((task) => task.id !== updatedTask.id)
+            };
+        });
+
+        // Find the section to which the updated task belongs
+        const targetSectionIndex = newSections.findIndex(
+            (section) => section.id === updatedTask.section
         );
 
-        // Update the sections state
-        setSections((prevSections) => {
-            let newSections = prevSections.map((section) => {
-                // Remove the task from its current section
-                return {
-                    ...section,
-                    tasks: section.tasks.filter((task) => task.id !== updatedTask.id)
-                };
+        // Add the updated task to the correct section
+        if (targetSectionIndex !== -1) {
+            newSections[targetSectionIndex].tasks.push(updatedTask);
+        }
+
+        return newSections;
+    });
+};
+
+    const handleDeleteTask = async (taskId) => {
+        try {
+            await axios.delete(`http://localhost:8000/projects/${projectId}/tasks/${taskId}`, {
+                headers: {
+                    Authorization: `Bearer ${authTokens?.access}`
+                }
             });
+            
+            // Update tasks state
+            setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
+            
+            // Update sections state
+            setSections((prevSections) => prevSections.map((section) => ({
+                ...section,
+                tasks: section.tasks.filter((task) => task.id !== taskId)
+            })));
 
-            // Find the section to which the updated task belongs
-            const targetSectionIndex = newSections.findIndex(
-                (section) => section.id === updatedTask.section
-            );
-
-            // Add the updated task to the correct section
-            if (targetSectionIndex !== -1) {
-                newSections[targetSectionIndex].tasks.push(updatedTask);
-            }
-
-            return newSections;
-        });
+        } catch (error) {
+            console.error('Error deleting task:', error);
+        }
     };
-
 
   return (
       <div>
@@ -92,38 +114,7 @@ export default function ProjectDetail () {
                           <h1 className="page-header-title">Kanban</h1>
                       </div>
                       {/* End Col */}
-                      <div className="col-lg-auto">
-                          <span className="text-cap small">Team members:</span>
-                          <div className="d-flex">
-                              {/* Avatar Group */}
-                              <div className="avatar-group avatar-circle me-3">
-                                  <a className="avatar" href="./user-profile.html" data-bs-toggle="tooltip" data-bs-placement="top" title="Amanda Harvey">
-                                      <img className="avatar-img" src="src/assets/img/160x160/img10.jpg" alt="Image Description" />
-                                  </a>
-                                  <a className="avatar" href="./user-profile.html" data-bs-toggle="tooltip" data-bs-placement="top" title="Linda Bates">
-                                      <img className="avatar-img" src="src/assets/img/160x160/img9.jpg" alt="Image Description" />
-                                  </a>
-                                  <a className="avatar avatar-soft-info" href="./user-profile.html" data-bs-toggle="tooltip" data-bs-placement="top" title="#digitalmarketing">
-                                      <span className="avatar-initials">
-                                          <i className="bi-people-fill" />
-                                      </span>
-                                  </a>
-                                  <a className="avatar" href="./user-profile.html" data-bs-toggle="tooltip" data-bs-placement="top" title="David Harrison">
-                                      <img className="avatar-img" src="src/assets/img/160x160/img3.jpg" alt="Image Description" />
-                                  </a>
-                                  <a className="avatar avatar-soft-dark" href="./user-profile.html" data-bs-toggle="tooltip" data-bs-placement="top" title="Antony Taylor">
-                                      <span className="avatar-initials">A</span>
-                                  </a>
-                                  <a className="avatar avatar-light avatar-circle" href="javascript:;" data-bs-toggle="modal" data-bs-target="#shareWithPeopleModal">
-                                      <span className="avatar-initials">+2</span>
-                                  </a>
-                              </div>
-                              {/* End Avatar Group */}
-                              <a className="btn btn-primary btn-icon rounded-circle" href="javascript:;" data-bs-toggle="modal" data-bs-target="#shareWithPeopleModal">
-                                  <i className="bi-share-fill" />
-                              </a>
-                          </div>
-                      </div>
+                      <TeamMembers />
                       {/* End Col */}
                   </div>
               </div>
@@ -178,7 +169,7 @@ export default function ProjectDetail () {
           <div className="tab-content" id="connectionsTabContent">
               <div className="tab-pane fade show active" id="grid" role="tabpanel" aria-labelledby="grid-tab">
                   {/* Content */}
-                  <TaskGridView projectId={projectId} sections={sections} users={users} tasks={tasks} onUpdateTask={handleUpdateTask} />
+                  <TaskGridView projectId={projectId} sections={sections} users={users} tasks={tasks} onUpdateTask={handleUpdateTask} onDeleteTask={handleDeleteTask} />
                   {/* End Content */}
               </div>
               <div className="tab-pane fade" id="list" role="tabpanel" aria-labelledby="list-tab">

@@ -2,7 +2,7 @@ import React, { useState, useContext, useCallback } from 'react';
 import axios from 'axios';
 import { AuthContext } from '../contexts/AuthContext';
 import { debounce } from 'lodash';
-import Timeline from './CommentTimeline';
+// import Timeline from './CommentTimeline';
 
 const TaskForm = ({ projectId, initialDetails = {}, onClose, onUpdateTask, users, sections }) => {
     const [details, setDetails] = useState(initialDetails);
@@ -150,7 +150,7 @@ const TaskForm = ({ projectId, initialDetails = {}, onClose, onUpdateTask, users
                 {errors.description && <div className="alert alert-danger">{errors.description}</div>}
             </div>
         </form>
-        <Timeline />
+        {/* <Timeline /> */}
         </>
     );
 };
