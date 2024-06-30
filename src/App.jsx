@@ -5,7 +5,6 @@ import Content from './components/Content';
 import Projects from './components/Projects';
 import Login from './components/Login';
 import Register from './components/Register';
-import Logout from './components/Logout';
 import ProjectDetail from './components/ProjectDetail';
 import useIdleTimer from './hooks/useIdleTimer'; // Import the custom hook
 import Chat from './components/Chat'
@@ -35,7 +34,6 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/logout" element={<Logout />} />
         <Route path="/" element={<PrivateRoute><Content /></PrivateRoute>} />
         <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
         <Route path="/projects/:projectId" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />

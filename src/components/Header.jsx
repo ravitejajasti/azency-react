@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import NavbarLogo from './navbar/Navbarlogo.jsx'
 import SearchLight from './navbar/SearchLight.jsx';
 import AsideToggle from './navbar/AsideToggle.jsx';
@@ -9,11 +9,52 @@ import LogoLight from '../assets/svg/logos-light/logo.svg'
 import LogoShort from '../assets/svg/logos/logo-short.svg'
 import LogoLightShort from '../assets/svg/logos-light/logo-short.svg'
 import NavbarVerticalAsideToggle from './partials/layouts-components/NavbarVerticalAsideToggle.jsx';
+import { AuthContext } from '../contexts/AuthContext';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
-function Header() {
+const Header=() => {
+  const { authTokens, logoutUser } = useContext(AuthContext);
+  const [userDetails, setUserDetails] = useState([]);
+
   const handleClick = (event) => {
     event.preventDefault(); // Prevent the default anchor behavior
     // Add any additional logic you want to execute on click
+  };
+
+  useEffect(() => {
+    const getUserDetails = async () => {
+      try {
+        console.log('Fetching user details...');
+
+        const response = await axios.get('http://localhost:8000/api/user/me/', {
+          headers: {
+            Authorization: `Bearer ${authTokens?.access}`,
+          }
+        });
+        setUserDetails(response.data);
+      } catch (error) {
+        if (error.response) {
+          console.error('Error response:', error.response);
+        } else if (error.request) {
+          console.error('Error request:', error.request);
+        } else {
+          console.error('Error message:', error.message);
+        }
+      }
+    };
+
+    if (authTokens?.access) {
+      getUserDetails();
+    }
+  }, [authTokens]);
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+      logoutUser();
+      setUserDetails([]);
+      navigate('/login');
   };
     return (
       <header id="header"
@@ -1006,8 +1047,8 @@ function Header() {
                     />
                   </div>
                   <div className="flex-grow-1 ms-3">
-                    <h5 className="mb-0">Mark Williams</h5>
-                    <p className="card-text text-body">mark@site.com</p>
+                    <h5 className="mb-0">{ userDetails.username}</h5>
+                    <p className="card-text text-body">{ 'test@example.com'}</p>
                   </div>
                 </div>
               </div>
@@ -1104,7 +1145,7 @@ function Header() {
                 Manage team
               </a>
               <div className="dropdown-divider" />
-              <a className="dropdown-item" href="#">
+              <a className="dropdown-item" href="#" onClick={handleLogout}>
                 Sign out
               </a>
             </div>
