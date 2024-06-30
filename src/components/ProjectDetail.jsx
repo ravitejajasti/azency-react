@@ -6,96 +6,13 @@ import { useParams } from 'react-router-dom';
 import TaskListView from './TaskListView';
 import TaskGridView from './TaskGridView';
 import TeamMembers from './TeamMembers';
+import useProjectData from '../hooks/useProjectData';
+import useTaskHandlers from '../hooks/useTaskHandlers';
 
 export default function ProjectDetail () {
-  const [tasks, setTasks] = useState([]);
-  const [sections, setSections] = useState([]);
-  const [users, setUsers] = useState([]);
-  const { projectId } = useParams();
-  const { authTokens } = useContext(AuthContext);
-
-  useEffect(() => {
-      // Function to fetch project data from API
-      const fetchProjectData = async () => {
-          try {
-              const response = await axios.get(`http://localhost:8000/projects/${projectId}/detail`, {
-                headers: {
-                    Authorization: `Bearer ${authTokens?.access}`
-                }
-            }); // Adjust the API endpoint as necessary
-            console.log('API Response Data:', response.data);
-
-            if (response.data) {
-                setSections(response.data.sections);
-                setUsers(response.data.members);
-
-                // Extract tasks from sections
-                const allTasks = response.data.sections.flatMap(section => section.tasks);
-                setTasks(allTasks);
-            } else {
-                console.error('Unexpected response structure:', response);
-            }
-        } catch (error) {
-            console.error('Error fetching project data:', error);
-        }
-    };
-
-    fetchProjectData();
-}, [projectId, authTokens]);
-
-const handleUpdateTask = (updatedTask) => {
-    // Update the tasks state
-    setTasks((prevTasks) => 
-        prevTasks.map((task) => 
-            task.id === updatedTask.id ? updatedTask : task
-        )
-    );
-
-    // Update the sections state
-    setSections((prevSections) => {
-        let newSections = prevSections.map((section) => {
-            // Remove the task from its current section
-            return {
-                ...section,
-                tasks: section.tasks.filter((task) => task.id !== updatedTask.id)
-            };
-        });
-
-        // Find the section to which the updated task belongs
-        const targetSectionIndex = newSections.findIndex(
-            (section) => section.id === updatedTask.section
-        );
-
-        // Add the updated task to the correct section
-        if (targetSectionIndex !== -1) {
-            newSections[targetSectionIndex].tasks.push(updatedTask);
-        }
-
-        return newSections;
-    });
-};
-
-    const handleDeleteTask = async (taskId) => {
-        try {
-            await axios.delete(`http://localhost:8000/projects/${projectId}/tasks/${taskId}`, {
-                headers: {
-                    Authorization: `Bearer ${authTokens?.access}`
-                }
-            });
-            
-            // Update tasks state
-            setTasks((prevTasks) => prevTasks.filter((task) => task.id !== taskId));
-            
-            // Update sections state
-            setSections((prevSections) => prevSections.map((section) => ({
-                ...section,
-                tasks: section.tasks.filter((task) => task.id !== taskId)
-            })));
-
-        } catch (error) {
-            console.error('Error deleting task:', error);
-        }
-    };
+    const { tasks, sections, users, setTasks, setSections } = useProjectData();
+    const { projectId } = useParams();
+    const { handleUpdateTask, handleDeleteTask } = useTaskHandlers(projectId, setTasks, setSections);
 
   return (
       <div>
