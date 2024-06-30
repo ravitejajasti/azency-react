@@ -21,12 +21,12 @@ function Navbar() {
         <div className="navbar-vertical-container">
           <div className="navbar-vertical-footer-offset">
           {/* Logo */}
-          {config.themeAppearance.layoutSkin === 'dark' ? (
+          {/* {config.themeAppearance.layoutSkin === 'dark' ? (
         <NavbarLogoLight />
       ) : (
         <NavbarLogo />
-      )}
-
+      )} */}
+      <NavbarLogo />
       {/* End Logo */}
       {/* Navbar Vertical Toggle */}
       <NavbarVerticalAsideToggle />

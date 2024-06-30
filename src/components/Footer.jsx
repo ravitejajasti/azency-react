@@ -17,14 +17,19 @@ const Footer = () => {
                 <a className="list-separator-link" href="#">License</a>
               </li>
               <li className="list-inline-item">
+              {/* Keyboard Shortcuts Toggle */}
                 <button className="btn btn-ghost-secondary btn-icon rounded-circle" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasKeyboardShortcuts">
                   <i className="bi-command"></i>
                 </button>
+              {/* End Keyboard Shortcuts Toggle */}
               </li>
             </ul>
+            {/* End List Separator */}
           </div>
         </div>
+        {/* End Col */}
       </div>
+      {/* End Row */}
     </footer>
   );
 };

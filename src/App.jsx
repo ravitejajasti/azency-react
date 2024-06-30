@@ -9,6 +9,12 @@ import Logout from './components/Logout';
 import ProjectDetail from './components/ProjectDetail';
 import useIdleTimer from './hooks/useIdleTimer'; // Import the custom hook
 import Chat from './components/Chat'
+import Calendar from './components/Calendar';
+import Header from './components/Header';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
+
+
 const PrivateRoute = ({ children }) => {
   const { authTokens } = useContext(AuthContext);
   return authTokens ? children : <Navigate to="/login" />;
@@ -22,6 +28,10 @@ function App() {
 
   return (
     <Router>
+      <Header />
+      {/* ========== MAIN CONTENT ========== */}
+      <main id="content" role='main' className='main'>
+      <Navbar />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -29,9 +39,14 @@ function App() {
         <Route path="/" element={<PrivateRoute><Content /></PrivateRoute>} />
         <Route path="/projects" element={<PrivateRoute><Projects /></PrivateRoute>} />
         <Route path="/projects/:projectId" element={<PrivateRoute><ProjectDetail /></PrivateRoute>} />
+        <Route path="/projects/:projectId/calendar" element={<PrivateRoute><Calendar /></PrivateRoute>} />
         <Route path="/" element={<Navigate to="/login" />} />
         <Route path="/chat" element={<Chat />} />
       </Routes>
+      </main>
+      {/* ========== END MAIN CONTENT ========== */}
+      <Footer />
+
     </Router>
   );
 }
