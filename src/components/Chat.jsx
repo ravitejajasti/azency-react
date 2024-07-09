@@ -34,38 +34,44 @@ const Chat = () => {
   return (
     <div className="splitted-content-main">
       <LeftSideCol>
-      <div className="card mb-3">
-        <div className='card-header card-header-content-between'>
-        <h3 className="card-header-title">Chat</h3>
-        {/* Nav */}
-        <ul className="nav nav-light">
-          <li className="nav-item">
-            <a className="nav-link active" href="#">
-              <i className="bi-house nav-icon" />
-            </a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#">
-              <i className="bi-person nav-icon" />
-            </a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link" href="#">
-              <i className="bi-sliders nav-icon" />
-            </a>
-          </li>
-          <li className="nav-item">
-            <a className="nav-link disabled" href="#" tabIndex={-1} aria-disabled="true">
-              <i className="bi-image nav-icon" />
-            </a>
-          </li>
-        </ul>
-        {/* End Nav */}
+      <div className="offcanvas-header">
+        <h2 className="mb-0">Chat</h2>
+          {/* Nav */}
+          <ul className="nav nav-light">
+              <li className="nav-item">
+                <a className="nav-link active" href="#">
+                  <i className="bi-house nav-icon" />
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#">
+                  <i className="bi-person nav-icon" />
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link" href="#">
+                  <i className="bi-sliders nav-icon" />
+                </a>
+              </li>
+              <li className="nav-item">
+                <a className="nav-link disabled" href="#" tabIndex={-1} aria-disabled="true">
+                  <i className="bi-send-plus nav-icon" />
+                </a>
+              </li>
+            </ul>
+          {/* End Nav */}
         </div>
-      </div>
-        {rooms.map((room, idx) => (
-          <div key={room.id} onClick={() => setRoomId(room.id)}>{room.name}</div>
-        ))}
+        {/* End Card */}
+        <div className="offcanvas-body card-body-height">
+            <ul className='list-unstyled list-py-2'>
+              {rooms.map((room, idx) => (
+                <li key={room.id} onClick={() => setRoomId(room.id)}>{room.name}</li>
+              ))}
+            </ul>
+          </div>
+          <div className="footer">
+            New Chat
+          </div>
       </LeftSideCol>
       <MainCol>
         {roomId && <ChatDetail roomId={roomId} />}

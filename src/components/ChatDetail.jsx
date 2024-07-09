@@ -8,6 +8,7 @@ import 'quill/dist/quill.snow.css';
 
 const ChatDetail = ({ roomId }) => {
   const [messages, setMessages] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
   const webSocketRef = useRef(null);
   const { authTokens } = useContext(AuthContext);
   const quillRef = useRef(null);
@@ -60,15 +61,49 @@ const ChatDetail = ({ roomId }) => {
     };
   }, [roomId, authTokens]);
 
+  const fetchRecommendations = async (message, recentMessages) => {
+    try {
+      const response = await axios.post(
+        'http://localhost:8000/chat/api/recommendations/',
+        { message, recentMessages },
+        {
+          headers: {
+            Authorization: `Bearer ${authTokens?.access}`
+          }
+        }
+      );
+      setRecommendations(response.data.recommendations);
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+    }
+  };
+
+  const handleTextChange = () => {
+    const message = quillRef.current.root.innerHTML.trim();
+    if (message !== '') {
+      const recentMessages = messages.slice(-3).map(msg => msg.message).join(' ');
+      fetchRecommendations(message, recentMessages);
+    } else {
+      setRecommendations([]);
+    }
+  };
+
+  useEffect(() => {
+    if (quillRef.current) {
+      quillRef.current.on('text-change', handleTextChange);
+    }
+  }, [messages]);
+
   const sendMessage = () => {
     if (webSocketRef.current && quillRef.current.root.innerHTML.trim() !== '') {
       webSocketRef.current.send(JSON.stringify({ message: quillRef.current.root.innerHTML }));
       quillRef.current.setContents([]);
+      setRecommendations([]);
     }
   };
 
   return (
-    <div className="">
+    <div className="content">
       <div className="row justify-content-lg-center">
         <div className="col-lg-12">
           <div className="d-grid gap-3 gap-lg-5">
@@ -110,7 +145,7 @@ const ChatDetail = ({ roomId }) => {
               </div>
               {/* End Header */}
               {/* Body */}
-              <div className="card-body card-body-height" id="chat-log" style={{ height: '45vh', overflowY: 'scroll' }}>
+              <div className="card-body card-body-height" id="chat-log" style={{}}>
                 <ul className="list-comment list-comment-divider mb-3 mt-3">
                   {messages.map((msg, index) => (
                     <li key={index}>
@@ -140,14 +175,30 @@ const ChatDetail = ({ roomId }) => {
             </div>
             {/* End Card */}
           </div>
-          {/* Quill */}
-          <div className="quill-custom mb-3">
-            <div className="js-quill" style={{ height: '5rem' }}></div>
+          {/* Recommendations Container */}
+          {recommendations.length > 0 && (
+            <div className="recommendations card mb-3">
+              <div className="card-body">
+                <h5>Recommended Replies:</h5>
+                <ul>
+                  {recommendations.map((rec, index) => (
+                    <li key={index}>{rec}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+          {/* End Recommendations Container */}
+          {/* Quill and Send Button Container */}
+          <div className="card-footer d-flex align-items-center mb-3">
+            <div className="quill-custom flex-grow-1" style={{ position: 'relative' }}>
+              <div className="js-quill" style={{ height: '5rem' }}></div>
+              <button id="submitMessage" className="btn btn-primary" style={{ position: 'absolute', bottom: '10px', right: '10px' }} onClick={sendMessage}>
+                Send <i className="bi-send" />
+              </button>
+            </div>
           </div>
-          <div className="d-flex justify-content-end gap-3 mb-3">
-            <button id="submitMessage" className="btn btn-primary" onClick={sendMessage}>Send</button>
-          </div>
-          {/* End Quill */}
+          {/* End Quill and Send Button Container */}
         </div>
       </div>
     </div>

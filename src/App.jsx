@@ -43,7 +43,7 @@ function App() {
       </Routes>
       </main>
       {/* ========== END MAIN CONTENT ========== */}
-      <Footer />
+      {/* <Footer /> */}
 
     </Router>
   );

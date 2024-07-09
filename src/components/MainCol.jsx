@@ -2,7 +2,7 @@ import React from 'react';
 
 const MainCol = ({children}) => {
   return (
-    <div className="splitted-content-fluid content-space d-flex flex-column" style={{ maxHeight: '100vh', overflowY: 'auto' }}>
+    <div className="splitted-content-fluid content-space d-flex flex-column" style={{ maxHeight: '100vh', overflowY: 'auto',  minHeight:'calc(100vh - 3.875rem)'  }}>
       {/* Toggles */}
       <div className="d-flex d-xl-none justify-content-end mt-3 me-3">
         <ul className="list-inline">
